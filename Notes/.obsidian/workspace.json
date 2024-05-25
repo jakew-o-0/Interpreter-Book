@@ -1,0 +1,172 @@
+{
+  "main": {
+    "id": "2bb32a3d9c9a6b57",
+    "type": "split",
+    "children": [
+      {
+        "id": "28b68788c48a07c2",
+        "type": "tabs",
+        "dimension": 39.127604166666664,
+        "children": [
+          {
+            "id": "ae5aba720159e04c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Lexing.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "bf944c5f79d44912",
+        "type": "tabs",
+        "dimension": 60.87239583333333,
+        "children": [
+          {
+            "id": "0ca58c81acbe3b67",
+            "type": "leaf",
+            "state": {
+              "type": "pdf",
+              "state": {
+                "file": "writing_an_interpreter_in_go_1.7.pdf"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "1734999fb6c87d80",
+    "type": "split",
+    "children": [
+      {
+        "id": "93b1e9bc096e9ba1",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "7cd861de0f84211d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "2d0e8720bc119432",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "626852e4a32f0909",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "6f197d8fe7053b52",
+    "type": "split",
+    "children": [
+      {
+        "id": "f03eb5789924f7b7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "14ae93e41a306e6e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "writing_an_interpreter_in_go_1.7.pdf",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "fdbf07c33f07d31c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "writing_an_interpreter_in_go_1.7.pdf",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "541c9d9dd3b118a5",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "67346a6d3821f9e7",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "writing_an_interpreter_in_go_1.7.pdf"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "0ca58c81acbe3b67",
+  "lastOpenFiles": [
+    "Lexing.md",
+    "writing_an_interpreter_in_go_1.7.pdf"
+  ]
+}
