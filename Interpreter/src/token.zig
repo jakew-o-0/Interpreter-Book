@@ -4,13 +4,9 @@ pub const Token = struct {
     literal: []const u8,
     type: TokenType,
 
-    pub fn setToken(
-        self: *Token,
-        tok_type: TokenType,
-        tok_literal: []const u8,
-    ) void {
+    pub fn setToken(self: *Token, tok_type: TokenType, tok_literal: []const u8) void {
         self.type = tok_type;
-        self.literal = tok_literal[0..];
+        self.literal = tok_literal;
     }
 
     pub fn setWord(self: *Token, word: []const u8) void {
@@ -21,7 +17,7 @@ pub const Token = struct {
         } else {
             self.type = TokenType.identifier;
         }
-        self.literal = word[0..];
+        self.literal = word;
     }
 };
 

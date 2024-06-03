@@ -2,6 +2,15 @@ const expect = @import("std").testing.expect;
 const std = @import("std");
 const t = @import("token.zig");
 
+pub fn NewLexer(src: []const u8) Lexer {
+    return .{
+        .source_code = src,
+        .cur_pos = 0,
+        .next_pos = 0,
+        .ch = undefined,
+    };
+}
+
 pub const Lexer = struct {
     source_code: []const u8,
     cur_pos: usize, // current char in source_code
@@ -105,7 +114,6 @@ pub const Lexer = struct {
                 }
             },
         }
-
         return tok;
     }
 };
@@ -124,12 +132,7 @@ test "Lexer Test" {
         \\if (5 < 10) { return true; } else { return false; }
         \\10 == 10; 10 != 9;
     ;
-    var lex = Lexer{
-        .source_code = input,
-        .cur_pos = 0,
-        .next_pos = 0,
-        .ch = undefined,
-    };
+    var lex = NewLexer(input);
 
     const tests = [_]t.Token{
         // variable decliration
@@ -226,10 +229,10 @@ test "Lexer Test" {
     };
 
     std.debug.print("\n", .{});
-    for (tests, 0..) |tes, i| {
+    for (tests) |tes| {
         const tok = lex.nextToken();
         expect(std.mem.eql(u8, tes.literal, tok.literal)) catch |err| {
-            std.debug.print("test.literal: {s}   token.literal: {s}   i: {d}\n", .{ tes.literal, tok.literal, i });
+            std.debug.print("Expected literal: {s}   Got: {s}\n", .{ tes.literal, tok.literal });
             return err;
         };
         expect(std.mem.eql(u8, @tagName(tes.type), @tagName(tok.type))) catch |err| {
