@@ -119,7 +119,7 @@ test "parser: test int literal expressions" {
 test "parser: test prefix expressions" {
     const input = "-5; !asdf";
     const tests = [_][]const u8{
-        "- 5",
+        "- int 5",
         "! identifier asdf",
     };
 
@@ -132,7 +132,7 @@ test "parser: test prefix expressions" {
         var buf: [255]u8 = undefined;
         const s = n.toString(&buf);
         std.testing.expect(std.mem.eql(u8, s, tes)) catch |err| {
-            std.debug.print("Expected: {s} Got: {s}", .{ tes, s });
+            std.debug.print("\nExpected: {s} Got: {s}\n", .{ tes, s });
             return err;
         };
     }
