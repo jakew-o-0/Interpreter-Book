@@ -83,6 +83,7 @@ pub const LetStatement = struct {
     }
 
     pub fn toString(self: *LetStatement, buf: []u8) []const u8 {
+        std.debug.print("\nbuf size: {d}\n", .{buf.len});
         return std.fmt.bufPrint(buf, "{s} {s}", .{ self.tokenLiteral.literal, self.ident }) catch unreachable;
     }
 };
@@ -140,6 +141,23 @@ pub const PrefixExpression = struct {
     pub fn toString(self: *PrefixExpression, buf: []u8) []const u8 {
         var b: [255]u8 = undefined;
         return std.fmt.bufPrint(buf, "{s} {s}", .{ self.opperator, self.right.toString(&b) }) catch unreachable;
+    }
+};
+
+pub const InfixExpression = struct {
+    tokenLiteral: token.Token,
+    opperator: []const u8,
+    left: Expression,
+    right: Expression,
+
+    pub fn expression(self: *InfixExpression) Expression {
+        return Expression.init(self);
+    }
+
+    pub fn toString(self: *InfixExpression, buf: []u8) []const u8 {
+        var lb: [255]u8 = undefined;
+        var rb: [255]u8 = undefined;
+        return std.fmt.bufPrint(buf, "{s} {s} {s}", .{ self.left.toString(&lb), self.opperator, self.right.toString(&rb) }) catch unreachable;
     }
 };
 // }}}

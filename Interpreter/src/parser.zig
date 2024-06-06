@@ -14,22 +14,6 @@ const OperatorPrecidence = enum(u16) {
     infix,
 };
 
-pub fn NewParser(alloc: std.mem.Allocator, lex: *l.Lexer) Parser {
-    var p = Parser{
-        .lexer = lex,
-        .cur_token = undefined,
-        .next_token = undefined,
-        .ast = std.ArrayList(a.Node).init(alloc),
-        .parsed_tokens_arena = std.heap.ArenaAllocator.init(std.heap.page_allocator),
-        .parsed_tokens_alloc = undefined,
-        .errors = std.ArrayList([]const u8).init(alloc),
-    };
-    p.parsed_tokens_alloc = p.parsed_tokens_arena.allocator();
-    p.increment();
-    p.increment();
-    return p;
-}
-
 pub const Parser = struct {
     lexer: *l.Lexer,
     cur_token: t.Token,
@@ -38,10 +22,40 @@ pub const Parser = struct {
     parsed_tokens_arena: std.heap.ArenaAllocator,
     parsed_tokens_alloc: std.mem.Allocator,
     errors: std.ArrayList([]const u8),
+    precidenceMap: std.AutoHashMap(t.TokenType, OperatorPrecidence),
 
+    pub fn init(alloc: std.mem.Allocator, lex: *l.Lexer) Parser {
+        var p = Parser{
+            .lexer = lex,
+            .cur_token = undefined,
+            .next_token = undefined,
+            .ast = std.ArrayList(a.Node).init(alloc),
+            .parsed_tokens_arena = std.heap.ArenaAllocator.init(alloc),
+            .parsed_tokens_alloc = undefined,
+            .errors = std.ArrayList([]const u8).init(alloc),
+            .precidenceMap = std.AutoHashMap(t.TokenType, OperatorPrecidence).init(alloc),
+        };
+
+        p.parsed_tokens_alloc = p.parsed_tokens_arena.allocator();
+
+        p.precidenceMap.put(t.TokenType.equal, OperatorPrecidence.equals) catch unreachable;
+        p.precidenceMap.put(t.TokenType.not_equal, OperatorPrecidence.equals) catch unreachable;
+        p.precidenceMap.put(t.TokenType.less_than, OperatorPrecidence.less_than) catch unreachable;
+        p.precidenceMap.put(t.TokenType.greater_than, OperatorPrecidence.less_than) catch unreachable;
+        p.precidenceMap.put(t.TokenType.plus, OperatorPrecidence.sum) catch unreachable;
+        p.precidenceMap.put(t.TokenType.minus, OperatorPrecidence.sum) catch unreachable;
+        p.precidenceMap.put(t.TokenType.divide, OperatorPrecidence.product) catch unreachable;
+        p.precidenceMap.put(t.TokenType.multiply, OperatorPrecidence.product) catch unreachable;
+
+        p.increment();
+        p.increment();
+        return p;
+    }
     pub fn deinit(self: *Parser) void {
         self.ast.deinit();
         self.errors.deinit();
+        self.parsed_tokens_arena.deinit();
+        self.precidenceMap.deinit();
     }
 
     fn increment(self: *Parser) void {
@@ -66,6 +80,20 @@ pub const Parser = struct {
         return false;
     }
 
+    fn peekPrecidence(self: *Parser) OperatorPrecidence {
+        if (self.precidenceMap.get(self.next_token.type)) |p| {
+            return p;
+        }
+        return OperatorPrecidence.lowest;
+    }
+
+    fn curPrecidence(self: *Parser) OperatorPrecidence {
+        if (self.precidenceMap.get(self.cur_token.type)) |p| {
+            return p;
+        }
+        return OperatorPrecidence.lowest;
+    }
+
     pub fn parseTokens(self: *Parser) void {
         while (self.cur_token.type != t.TokenType.eof) {
             const node = switch (self.cur_token.type) {
@@ -84,14 +112,59 @@ pub const Parser = struct {
     // Parsing Expressions {{{
 
     fn parseExpression(self: *Parser, precidence: OperatorPrecidence) ?a.Expression {
-        _ = precidence;
-        return switch (self.cur_token.type) {
+        var left_expr = switch (self.cur_token.type) {
             t.TokenType.identifier => self.parseIdentifier(),
             t.TokenType.int => self.parseIntLiteral(),
             t.TokenType.minus => self.parsePrefixExpression(),
             t.TokenType.bang => self.parsePrefixExpression(),
+
             else => null,
         };
+        if (left_expr == null) return null;
+
+        while (self.next_token.type != t.TokenType.semicolon and
+            @intFromEnum(precidence) < @intFromEnum(self.peekPrecidence()))
+        {
+            self.increment();
+            left_expr = switch (self.cur_token.type) {
+                t.TokenType.plus => self.parseInfixExpression(left_expr),
+                t.TokenType.minus => self.parseInfixExpression(left_expr),
+                t.TokenType.multiply => self.parseInfixExpression(left_expr),
+                t.TokenType.divide => self.parseInfixExpression(left_expr),
+                t.TokenType.less_than => self.parseInfixExpression(left_expr),
+                t.TokenType.greater_than => self.parseInfixExpression(left_expr),
+                t.TokenType.equal => self.parseInfixExpression(left_expr),
+                t.TokenType.not_equal => self.parseInfixExpression(left_expr),
+                else => null,
+            };
+            if (left_expr == null) {
+                return null;
+            }
+        }
+        return left_expr;
+    }
+
+    fn parseInfixExpression(self: *Parser, left: ?a.Expression) ?a.Expression {
+        if (left == null) {
+            return null;
+        }
+
+        var expr = a.InfixExpression{
+            .tokenLiteral = self.cur_token,
+            .opperator = self.cur_token.literal,
+            .left = left.?,
+            .right = undefined,
+        };
+
+        const precidence = self.curPrecidence();
+        self.increment();
+        if (self.parseExpression(precidence)) |e| {
+            expr.right = e;
+            return expr.expression();
+        } else {
+            self.errors.append("unable to parse right side to infix") catch unreachable;
+            return null;
+        }
     }
 
     fn parsePrefixExpression(self: *Parser) ?a.Expression {
