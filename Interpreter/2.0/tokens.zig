@@ -55,13 +55,12 @@ pub const TokenType = enum {
     illegal,
 };
 
-const keywordMap = ComptimeStringMap(
-    TokenType,
-    .{ .key = "Let", .value = TokenType.keyw_let },
-    .{ .key = "fn", .value = TokenType.keyw_function },
-    .{ .key = "if", .value = TokenType.keyw_if },
-    .{ .key = "else", .value = TokenType.keyw_else },
-    .{ .key = "return", .value = TokenType.keyw_return },
-    .{ .key = "true", .value = TokenType.type_bool },
-    .{ .key = "false", .value = TokenType.type_bool },
-);
+const keywordMap = ComptimeStringMap(TokenType, .{
+    .{ "let", TokenType.keyw_let },
+    .{ "fn", TokenType.keyw_function },
+    .{ "if", TokenType.keyw_if },
+    .{ "else", TokenType.keyw_else },
+    .{ "return", TokenType.keyw_return },
+    .{ "true", TokenType.type_bool },
+    .{ "false", TokenType.type_bool },
+});

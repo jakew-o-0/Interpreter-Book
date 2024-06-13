@@ -90,7 +90,7 @@ test "Lexer Test" {
         Token{ .type = TokenType.op_less_than, .literal = "<" },
         Token{ .type = TokenType.type_int, .literal = "10" },
         Token{ .type = TokenType.syn_r_paren, .literal = ")" },
-        Token{ .type = TokenType.syn_r_brace, .literal = "{" },
+        Token{ .type = TokenType.syn_l_brace, .literal = "{" },
         Token{ .type = TokenType.keyw_return, .literal = "return" },
         Token{ .type = TokenType.type_bool, .literal = "true" },
         Token{ .type = TokenType.syn_semicolon, .literal = ";" },
@@ -116,18 +116,19 @@ test "Lexer Test" {
         Token{ .type = TokenType.eof, .literal = "" },
     };
     var lexer = Lexer.init(test_alloc, input);
-    const tokens = lexer.getTokens();
+    defer lexer.deinit();
+    const tokens = lexer.lexSrc();
 
     for (tokens, tests) |token, test_cond| {
         expect(eql(u8, test_cond.literal, token.literal)) catch |err| {
-            print("Expected literal: {s}   Got: {s}\n", .{
+            print("\n\nExpected literal: {s}   Got: {s}\n\n", .{
                 test_cond.literal,
                 token.literal,
             });
             return err;
         };
         expect(test_cond.type == token.type) catch |err| {
-            print("testype: {s}. token.type: {s}\n", .{
+            print("\n\ntestype: {s}. token.type: {s}\n\n", .{
                 @tagName(test_cond.type),
                 @tagName(token.type),
             });
