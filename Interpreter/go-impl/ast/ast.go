@@ -75,6 +75,15 @@ func (i *IntLiteral) ToString() string {
     return fmt.Sprintf("%d", i.Value)
 }
 
+type BoolLiteral struct {
+    Token token.Token
+    Value bool
+}
+func (b *BoolLiteral) expressionInf() {}
+func (b *BoolLiteral) ToString() string {
+    return fmt.Sprintf("%t", b.Value)
+}
+
 type PrefixExpression struct {
     Token token.Token
     Opperator string
@@ -82,7 +91,7 @@ type PrefixExpression struct {
 }
 func (p *PrefixExpression) expressionInf() {}
 func (p *PrefixExpression) ToString() string {
-    return fmt.Sprintf("opperator:%s right:%s", p.Opperator, p.Right.ToString())
+    return fmt.Sprintf("(%s%s)", p.Opperator, p.Right.ToString())
 }
 
 type InfixExpression struct {
@@ -93,6 +102,6 @@ type InfixExpression struct {
 }
 func (i *InfixExpression) expressionInf() {}
 func (i *InfixExpression) ToString() string {
-    return fmt.Sprintf("left:%s opperator:%s right:%s", i.Left.ToString(), i.Opperator, i.Right.ToString())
+    return fmt.Sprintf("(%s %s %s)", i.Left.ToString(), i.Opperator, i.Right.ToString())
 }
 //}}}

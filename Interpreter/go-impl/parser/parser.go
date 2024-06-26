@@ -135,19 +135,21 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
     if !p.assert(token.Syn_semicolon, "invalid syntax: expected ';'") {
         return nil
     }
-    println(stmt.Value.ToString())
     return &stmt
 }
 // }}}
 
+var indent int = 0
 // parse expressions {{{
 func (p *Parser) parseExpression(precidence int) ast.Expression {
     var leftExpr ast.Expression
     switch p.curToken.TokenType {
         case token.Type_identifier: leftExpr = p.parseIdentExpression()
         case token.Type_int: leftExpr = p.parseIntLiteral()
+        case token.Type_bool: leftExpr = p.parseBoolLiteral()
         case token.Op_bang: leftExpr = p.parsePrefixExpression()
         case token.Op_minus: leftExpr = p.parsePrefixExpression()
+        case token.Syn_lparen: leftExpr = p.parseParenExpr()
         default: leftExpr = nil
     }
     if leftExpr == nil {
@@ -170,6 +172,7 @@ func (p *Parser) parseExpression(precidence int) ast.Expression {
         if leftExpr == nil {
             return nil
         }
+
     }
     return leftExpr
 }
@@ -218,14 +221,42 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
         Token: p.curToken,
         Opperator: p.curToken.Literal,
     }
-    prec := p.getPrecidence(p.curToken.TokenType)
     p.Incr()
 
-    expr.Right = p.parseExpression(prec)
+    expr.Right = p.parseExpression(precidence_Prefix)
     if expr.Right == nil {
         return nil
     }
     return &expr
+}
+
+func (p *Parser) parseBoolLiteral() ast.Expression {
+    expr := ast.BoolLiteral {
+        Token: p.curToken,
+    }
+    b,err := strconv.ParseBool(p.curToken.Literal)
+    if err != nil {
+        p.errors = append(p.errors, "Invalid bool literal")
+        return nil
+    }
+    expr.Value = b
+    return &expr
+}
+
+func (p *Parser) parseParenExpr() ast.Expression {
+    p.Incr()
+    expr := p.parseExpression(precidence_Lowest)
+
+    if expr == nil {
+        p.errors = append(p.errors, "could not parse expression in parens")
+        return nil
+    }
+    if p.nextToken.TokenType != token.Syn_rparen {
+        p.errors = append(p.errors, "invalid syntax: expected ')'")
+        return nil
+    }
+    p.Incr()
+    return expr
 }
 //}}}
 

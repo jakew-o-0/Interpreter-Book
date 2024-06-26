@@ -17,13 +17,16 @@ func TestLetStatements(t *testing.T) {
     p := New(&l)
     p.ParseTokens()
 
-    for _,e := range p.errors {
-        println(e)
-    }
     for i,node := range p.ast {
         if node.ToString() != tests[i] {
             t.Fatalf("Expected:'%s', got:'%s'", tests[i], node.ToString())
         }
+    }
+    if len(p.errors) > 0 {
+        for _,e := range p.errors {
+            println(e)
+        }
+        t.Fatal()
     }
 }
 
@@ -44,6 +47,12 @@ func TestReturnStatements(t *testing.T) {
             t.Fatalf("Expected:'%s', got:'%s'", tests[i], node.ToString())
         }
     }
+    if len(p.errors) > 0 {
+        for _,e := range p.errors {
+            println(e)
+        }
+        t.Fatal()
+    }
 }
 
 func TestIntLiteralExpressions(t *testing.T) {
@@ -55,20 +64,22 @@ func TestIntLiteralExpressions(t *testing.T) {
     p.ParseTokens()
 
     node := p.ast[0]
-    for _,e := range p.errors {
-        println(e)
-    }
     if node.ToString() != test {
         t.Fatalf("Expected:'%s', got:'%s'", test, node.ToString())
     }
-
+    if len(p.errors) > 0 {
+        for _,e := range p.errors {
+            println(e)
+        }
+        t.Fatal()
+    }
 }
 
 func TestPrefixExpressions(t *testing.T) {
-    input := "-5; !asdf";
+    input := "-5; !asdf;"
     tests := []string {
-        "expression stmt:: value:opperator:- right:5",
-        "expression stmt:: value:opperator:! right:asdf",
+        "expression stmt:: value:(-5)",
+        "expression stmt:: value:(!asdf)",
     }
 
     l := lexer.New([]byte(input))
@@ -79,20 +90,26 @@ func TestPrefixExpressions(t *testing.T) {
         if node.ToString() != tests[i] {
             t.Fatalf("Expected:'%s', got:'%s'", tests[i], node.ToString())
         }
+    }
+    if len(p.errors) > 0 {
+        for _,e := range p.errors {
+            println(e)
+        }
+        t.Fatal()
     }
 }
 
 func TestInfixExpressions(t *testing.T) {
     input := "5 + 5; 5 - 5; 5 / 5; 5 * 5; 5 < 5; 5 > 5; 5 == 5; 5 != 5;"
     tests := []string {
-        "expression stmt:: value:left:5 opperator:+ right:5",
-        "expression stmt:: value:left:5 opperator:- right:5",
-        "expression stmt:: value:left:5 opperator:/ right:5",
-        "expression stmt:: value:left:5 opperator:* right:5",
-        "expression stmt:: value:left:5 opperator:< right:5",
-        "expression stmt:: value:left:5 opperator:> right:5",
-        "expression stmt:: value:left:5 opperator:== right:5",
-        "expression stmt:: value:left:5 opperator:!= right:5",
+        "expression stmt:: value:(5 + 5)",
+        "expression stmt:: value:(5 - 5)",
+        "expression stmt:: value:(5 / 5)",
+        "expression stmt:: value:(5 * 5)",
+        "expression stmt:: value:(5 < 5)",
+        "expression stmt:: value:(5 > 5)",
+        "expression stmt:: value:(5 == 5)",
+        "expression stmt:: value:(5 != 5)",
     }
 
     l := lexer.New([]byte(input))
@@ -103,5 +120,94 @@ func TestInfixExpressions(t *testing.T) {
         if node.ToString() != tests[i] {
             t.Fatalf("Expected:'%s', got:'%s'", tests[i], node.ToString())
         }
+    }
+    if len(p.errors) > 0 {
+        for _,e := range p.errors {
+            println(e)
+        }
+        t.Fatal()
+    }
+}
+
+func TestComplexExpression(t *testing.T) {
+    input :=  `
+    -a * b;
+    !-a;
+    a + b + c;
+    a + b - c;
+    a * b * c;
+    a * b / c;
+    a + b / c;
+    a + b * c + d / e - f;
+    3 + 4;
+    -5 * 5;
+    5 > 4 == 3 < 4;
+    5 < 4 != 3 > 4;
+    3 + 4 * 5 == 3 * 1 + 4 * 5;
+    1 + (2 + 3) + 4;
+    (5 + 5) * 2;
+    2 / (5 + 5);
+    -(5 + 5);
+    !(true == true);`
+    tests := []string {
+        "expression stmt:: value:((-a) * b)",
+        "expression stmt:: value:(!(-a))",
+        "expression stmt:: value:((a + b) + c)",
+        "expression stmt:: value:((a + b) - c)",
+        "expression stmt:: value:((a * b) * c)",
+        "expression stmt:: value:((a * b) / c)",
+        "expression stmt:: value:(a + (b / c))",
+        "expression stmt:: value:(((a + (b * c)) + (d / e)) - f)",
+        "expression stmt:: value:(3 + 4)",
+        "expression stmt:: value:((-5) * 5)",
+        "expression stmt:: value:((5 > 4) == (3 < 4))",
+        "expression stmt:: value:((5 < 4) != (3 > 4))",
+        "expression stmt:: value:((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
+        "expression stmt:: value:((1 + (2 + 3)) + 4)",
+        "expression stmt:: value:((5 + 5) * 2)",
+        "expression stmt:: value:(2 / (5 + 5))",
+        "expression stmt:: value:(-(5 + 5))",
+        "expression stmt:: value:(!(true == true))",
+    }
+
+    l := lexer.New([]byte(input))
+    p := New(&l)
+    p.ParseTokens()
+
+    for i,node := range p.ast {
+        if node.ToString() != tests[i] {
+            t.Fatalf("Expected:%s  got:%s", tests[i], node.ToString())
+        }
+    }
+    if len(p.errors) > 0 {
+        for _,e := range p.errors {
+            println(e)
+        }
+        t.Fatal()
+    }
+}
+
+func TestBoolLiterals(t *testing.T) {
+    input := "true; false; 3 > 5 == false; 3 < 5 == true;"
+    tests := []string {
+        "expression stmt:: value:true",
+        "expression stmt:: value:false",
+        "expression stmt:: value:((3 > 5) == false)",
+        "expression stmt:: value:((3 < 5) == true)",
+    }
+    l := lexer.New([]byte(input))
+    p := New(&l)
+    p.ParseTokens()
+
+    for i,node := range p.ast {
+        if node.ToString() != tests[i] {
+            t.Fatalf("Expected:%s  got:%s", tests[i], node.ToString())
+        }
+    }
+    if len(p.errors) > 0 {
+        for _,e := range p.errors {
+            println(e)
+        }
+        t.Fatal()
     }
 }
